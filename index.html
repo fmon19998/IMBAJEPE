@@ -443,6 +443,34 @@ font-weight:bold;
 margin-top:10px;
 color:#ff3b3b;
 }
+.catnav div{
+cursor:pointer;
+transition:.2s;
+}
+
+.catnav div:hover{
+background:#42b549;
+color:white;
+}
+/* FIX BUTTON DARK MODE */
+.dark .catnav div{
+background:#1a1a1a;
+color:#fff;
+border:1px solid rgba(255,255,255,0.15);
+}
+
+.dark .catnav div:hover{
+background:#42b549;
+color:#fff;
+}
+.catnav div{
+font-weight:bold;
+letter-spacing:0.5px;
+}
+
+.dark .catnav div{
+box-shadow:0 4px 12px rgba(0,0,0,0.5);
+}
 </style>
 </head>
 
@@ -482,11 +510,11 @@ color:#ff3b3b;
 </div>
 
 <div class="catnav">
-<div>Trending</div>
-<div>Promo</div>
-<div>Reward</div>
-<div>Event</div>
-<div>VIP</div>
+<div onclick="loadCategory('trending')">Trending</div>
+<div onclick="loadCategory('promo')">Promo</div>
+<div onclick="loadCategory('reward')">Reward</div>
+<div onclick="loadCategory('event')">Event</div>
+<div onclick="loadCategory('vip')">VIP</div>
 </div>
 
 <div class="title">🔥 Platform Terbaik Hari Ini</div>
@@ -680,7 +708,7 @@ showBannerPopup();
 /* ==== PRIZE POOL AUTO INCREASE ==== */
 
 /* ==== JACKPOT LIVE REALTIME ==== */
-
+let hasBoom = false;
 let prize = 12500000;
 
 function formatRupiah(num){
@@ -699,7 +727,11 @@ box.classList.remove("prize-normal","prize-hot","prize-max");
 if(prize >= 100000000){
 box.classList.add("prize-max");
 status.innerText = "🎆 JACKPOT PECAH!";
+
+if(!hasBoom){
+hasBoom = true;
 triggerBoom();
+}
 }
 else if(prize >= 50000000){
 box.classList.add("prize-hot");
@@ -745,6 +777,7 @@ function resetJackpot(){
 prize = 10000000;
 countdown = 60;
 resetting = false;
+hasBoom = false;
 updateUI();
 startCountdown();
 }
@@ -793,6 +826,61 @@ setInterval(generateLeaderboard,10000);
 
 /* INIT */
 generateLeaderboard();
+/* ==== CATEGORY SYSTEM ==== */
+
+function loadCategory(type){
+let box = document.getElementById("list");
+box.innerHTML = "";
+
+if(type === "trending"){
+for(let i=0;i<5;i++){
+box.innerHTML += `
+<div class="card">
+<h3>🔥 User ${generateName()} menang Rp ${(Math.floor(Math.random()*200+50)*100000).toLocaleString("id-ID")}</h3>
+<p>Baru saja mendapatkan jackpot besar di IMBAJP</p>
+</div>`;
+}
+}
+
+if(type === "promo"){
+box.innerHTML = `
+<div class="card">🎁 BONUS TOP UP HARIAN 10%</div>
+<div class="card">🎁 BONUS AJAK TEMAN</div>
+<div class="card">🎁 BONUS REFERAL 0.5%</div>
+<div class="card">🎁 BONUS CASHBACK 10%</div>
+<div class="card">🎁 BONUS MINGGUAN</div>
+<div class="card">🎁 BONUS BULANAN</div>
+`;
+}
+
+if(type === "reward"){
+for(let i=0;i<4;i++){
+box.innerHTML += `
+<div class="card">
+🏆 Reward Eksklusif Member Aktif  
+<p>Dapatkan hadiah menarik setiap hari</p>
+</div>`;
+}
+}
+
+if(type === "event"){
+for(let i=0;i<3;i++){
+box.innerHTML += `
+<div class="card">
+🎯 Event Harian Berhadiah  
+<p>Main hari ini dan menangkan bonus besar</p>
+</div>`;
+}
+}
+
+if(type === "vip"){
+box.innerHTML = `
+<div class="card">💎 VIP SILVER — Cashback lebih besar</div>
+<div class="card">💎 VIP GOLD — Bonus harian + prioritas</div>
+<div class="card">💎 VIP PLATINUM — Semua benefit + reward eksklusif</div>
+`;
+}
+}
 </script>
 
 <style>
