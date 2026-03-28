@@ -333,7 +333,116 @@ to{transform:translateX(0);opacity:1}
 .logo-img{height:52px;}
 .hero-text h1{font-size:22px;}
 }
+.prize-box{
+margin:15px 20px;
+padding:18px;
+border-radius:16px;
+background:linear-gradient(135deg,#ffcc00,#ff9900);
+color:#000;
+text-align:center;
+box-shadow:0 10px 30px rgba(255,165,0,.5);
+position:relative;
+overflow:hidden;
+}
 
+.prize-box::after{
+content:"";
+position:absolute;
+top:0;
+left:-120%;
+width:100%;
+height:100%;
+background:linear-gradient(120deg,transparent,rgba(255,255,255,.8),transparent);
+animation:shine 3s infinite;
+}
+
+@keyframes shine{
+0%{left:-120%}
+100%{left:120%}
+}
+
+#prizeAmount{
+font-size:28px;
+font-weight:bold;
+margin-top:8px;
+color:#111;
+text-shadow:0 0 10px rgba(255,255,255,.8);
+animation:pulsePrize 1.5s infinite;
+}
+
+@keyframes pulsePrize{
+0%{transform:scale(1)}
+50%{transform:scale(1.08)}
+100%{transform:scale(1)}
+}
+
+.prize-note{
+font-size:13px;
+margin-top:6px;
+}
+/* WARNA LEVEL */
+.prize-normal{
+background:linear-gradient(135deg,#ffcc00,#ff9900);
+}
+
+.prize-hot{
+background:linear-gradient(135deg,#ff3b3b,#ff0000);
+color:#fff;
+}
+
+.prize-max{
+background:linear-gradient(135deg,#00ffcc,#00ccff);
+color:#000;
+}
+
+/* SHAKE EFFECT */
+@keyframes shake{
+0%{transform:translateX(0)}
+25%{transform:translateX(-3px)}
+50%{transform:translateX(3px)}
+75%{transform:translateX(-3px)}
+100%{transform:translateX(0)}
+}
+
+/* FLASH EFFECT */
+@keyframes flash{
+0%{box-shadow:0 0 0px rgba(255,255,255,0)}
+50%{box-shadow:0 0 40px rgba(255,255,255,.9)}
+100%{box-shadow:0 0 0px rgba(255,255,255,0)}
+}
+/* LEADERBOARD */
+.leaderboard{
+margin:20px;
+padding:15px;
+background:#111;
+color:#fff;
+border-radius:14px;
+box-shadow:0 10px 25px rgba(0,0,0,.4);
+}
+
+.leaderboard h3{
+margin:0 0 10px;
+font-size:18px;
+}
+
+.leaderboard ul{
+list-style:none;
+padding:0;
+margin:0;
+}
+
+.leaderboard li{
+padding:6px 0;
+border-bottom:1px solid rgba(255,255,255,.1);
+font-size:14px;
+}
+
+/* COUNTDOWN STYLE */
+#resetTimer{
+font-weight:bold;
+margin-top:10px;
+color:#ff3b3b;
+}
 </style>
 </head>
 
@@ -353,6 +462,23 @@ to{transform:translateX(0);opacity:1}
 <div id="heroVisitor" style="margin-top:6px;font-size:14px;">👥 120 orang melihat</div>
 <a class="hero-btn" href="https://mbob.in/imbajp" target="_blank">Mulai Sekarang</a>
 </div>
+</div> <!-- tutup hero -->
+
+<!-- PRIZE POOL -->
+<div class="prize-box" id="prizeBox">
+🔥 JACKPOT PRIZE POOL
+<div id="prizeAmount">Rp 12,500,000</div>
+<div id="prizeStatus" class="prize-note">⏳ Sedang naik...</div>
+</div>
+<!-- COUNTDOWN -->
+<div id="resetTimer" class="prize-note" style="text-align:center;">
+⏳ Reset dalam: 60 detik
+</div>
+
+<!-- LEADERBOARD -->
+<div class="leaderboard">
+<h3>🏆 Pemenang Terbaru</h3>
+<ul id="leaderList"></ul>
 </div>
 
 <div class="catnav">
@@ -551,7 +677,122 @@ if(window.innerWidth < 768 && !popupShown){
 showBannerPopup();
 }
 },9000);
+/* ==== PRIZE POOL AUTO INCREASE ==== */
 
+/* ==== JACKPOT LIVE REALTIME ==== */
+
+let prize = 12500000;
+
+function formatRupiah(num){
+return "Rp " + num.toLocaleString("id-ID");
+}
+
+function updateUI(){
+let el = document.getElementById("prizeAmount");
+let box = document.getElementById("prizeBox");
+let status = document.getElementById("prizeStatus");
+
+el.innerText = formatRupiah(prize);
+
+box.classList.remove("prize-normal","prize-hot","prize-max");
+
+if(prize >= 100000000){
+box.classList.add("prize-max");
+status.innerText = "🎆 JACKPOT PECAH!";
+triggerBoom();
+}
+else if(prize >= 50000000){
+box.classList.add("prize-hot");
+status.innerText = "🚨 HAMPIR PECAH 50JT!";
+}
+else{
+box.classList.add("prize-normal");
+status.innerText = "⏳ Sedang naik...";
+}
+}
+
+/* NAIK TIAP DETIK */
+setInterval(()=>{
+let randomAdd = Math.floor(Math.random()*20000 + 5000);
+prize += randomAdd;
+updateUI();
+},1000);
+
+/* INIT */
+updateUI();
+/* ==== SOUND JACKPOT ==== */
+let jackpotSound = new Audio("https://assets.mixkit.co/active_storage/sfx/2769/2769-preview.mp3");
+
+/* ==== COUNTDOWN RESET ==== */
+let countdown = 60;
+let resetting = false;
+
+function startCountdown(){
+let timer = document.getElementById("resetTimer");
+
+let interval = setInterval(()=>{
+countdown--;
+timer.innerText = "⏳ Reset dalam: " + countdown + " detik";
+
+if(countdown <= 0){
+clearInterval(interval);
+resetJackpot();
+}
+},1000);
+}
+
+function resetJackpot(){
+prize = 10000000;
+countdown = 60;
+resetting = false;
+updateUI();
+startCountdown();
+}
+
+/* ==== MODIF triggerBoom ==== */
+function triggerBoom(){
+let box = document.getElementById("prizeBox");
+
+box.style.animation = "flash 0.8s ease, shake 0.5s";
+
+jackpotSound.play();
+
+if(!resetting){
+resetting = true;
+startCountdown();
+}
+
+setTimeout(()=>{
+box.style.animation = "";
+},1000);
+}
+
+/* ==== LEADERBOARD RANDOM ==== */
+function generateName(){
+let base = ["ala","vin","zen","mik","rak","lop","dap","rex","neo","kaz"];
+let name = base[Math.floor(Math.random()*base.length)];
+let extra = Math.floor(Math.random()*9999);
+return name + extra;
+}
+
+function generateLeaderboard(){
+let list = document.getElementById("leaderList");
+list.innerHTML = "";
+
+for(let i=0;i<10;i++){
+let li = document.createElement("li");
+let amount = (Math.floor(Math.random()*200+50)*100000).toLocaleString("id-ID");
+
+li.innerText = "👤 " + generateName() + " menang Rp " + amount;
+list.appendChild(li);
+}
+}
+
+/* UPDATE LEADERBOARD TIAP 10 DETIK */
+setInterval(generateLeaderboard,10000);
+
+/* INIT */
+generateLeaderboard();
 </script>
 
 <style>
